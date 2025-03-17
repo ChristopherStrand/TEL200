@@ -1,5 +1,5 @@
 \documentclass[a4paper,12pt]{article}
-
+\usepackage{amsmath}
 \usepackage[utf8]{inputenc}  
 \usepackage{graphicx}       
 \usepackage{geometry}
@@ -30,9 +30,59 @@ The report provides detailed insights into the methods, procedures, and results 
 
 \section{Method}
 \subsection{Theory}
-To understad the motion of a robotarm it´s important to understand some key concepts.
+In this chapter, some important concepts are presented to help understand how a robotic arm moves.
+
 \subsubsection{Pose in 3 dimensions}
-\subsubsection{Path/Trajectory}
+The pose of an object describes its position and orientation relative to a known reference point. It can be mathematically represented using a homogeneous transformation matrix:
+
+\[
+T = 
+\begin{bmatrix}
+R & t \\
+0 & 1
+\end{bmatrix}
+\]
+
+- \( R \) represents orientation (rotation matrix).
+\\
+- \( t \) represents position (translation vector).
+
+In two-dimensional (2D) space, the homogeneous transformation matrix is:
+\[
+T =
+\begin{bmatrix}
+r_{11} & r_{12} & x \\
+r_{21} & r_{22} & y \\
+0 & 0 & 1
+\end{bmatrix}
+\]
+
+In three-dimensional (3D) space, the matrix expands to:
+\[
+T = 
+\begin{bmatrix}
+r_{11} & r_{12} & r_{13} & x \\
+r_{21} & r_{22} & r_{23} & y \\
+r_{31} & r_{32} & r_{33} & z \\
+0 & 0 & 0 & 1
+\end{bmatrix}
+\]
+
+\subsubsection{Path and Trajectory}
+A path describes how the robot moves from one pose to another without specifying timing details. A trajectory, however, is a path combined with timing information, specifying when and how quickly the robot moves through each point along the path.
+
+\subsubsection{Joint space vs. Cartesian space}
+When moving the robotic arm, you must decide whether to calculate the motion using joint space or Cartesian space:
+
+- \textbf{Joint space} describes the robot's position based on its joint angles. Paths in joint space are mathematically simple to compute but usually don't result in straight-line paths for the robot's tool. This can cause problems for tasks that require precise linear movements, like welding. Because joint space plans motion based solely on joint angles, the end-effector's actual path can differ from what is desired.
+
+- \textbf{Cartesian space} directly considers the position of the robot's tool (end-effector). Cartesian paths ensure more precise, straight-line movements, ideal for tasks needing high accuracy. However, these calculations are more complex and may lead to very high joint velocities, particularly near singularities, which are positions where the robot has limited movement capabilities and might struggle to perform smooth motions.
+
+\subsubsection{Singularities}
+Singularities are specific robot poses where it loses the ability to freely move in certain directions. Near singularities, joint velocities can become very high, potentially causing mechanical issues or imprecise movements.
+
+The YuMi robot, with its seven joints, experiences fewer singularities and can easily reach most points within its workspace, making it highly suitable for versatile tasks. Robots specifically designed for a certain task may not require many joints, but their reduced flexibility might cause problems if their operating conditions change unexpectedly.
+
 
 
 \subsection{YuMi Application}
