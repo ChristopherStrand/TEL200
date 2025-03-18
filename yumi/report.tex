@@ -86,6 +86,10 @@ The YuMi robot, with its seven joints, experiences fewer singularities and can e
 
 
 \subsection{YuMi Application}
+The workstation is composed of a cube, cylinder and prism and two slots for each where the task it to move these from one of the slots to the other one and back on the press of a button.
+The YuMi application will not need any modifications to the models as these were already implemented.
+\subsubsection{Creating the paths and targets}
+the slots are places in a 3x3 grid where the coloums (x axis) is the slots and the rows (y axis?????????:O) are the slots for each body, coordinate system defined from the table. The distance between the center of each slot is 100mm. The task is to move the bodies from  
 
 \subsection{YuMi Challenge}
 \subsubsection{CAD geometry}
@@ -97,7 +101,42 @@ To create our CAD geometry we used a 3D-scanner borrowed from Eiklab to make a 3
     \item Rotated the chess pieces such that they are straight
     \item Exported them as .sat files
 \end{enumerate}
-We then imported the .sat files to Robotstudio using the import CAD geometry button. To be continued
+We then imported the .sat files into Robotstudio using the import CAD geometry button. When the chess pieces are imported we needed to move them their correct spaces on the chess board. This was done by trial and error, and duplicate button was used to get pieces which have multiples.
+
+\subsubsection{Creating the paths and targets}
+\label{sec:Challenge_paths_targets}
+When creating the paths, we based the targets on the following chess moves.
+
+\begin{table}[h] %Scholar's mate moves
+    \centering
+    \begin{tabular}{c l l}
+        \hline
+        Move & White & Black \\
+        \hline
+        1. & e4 & e5 \\
+        2. & Dh5 & Sc6 \\
+        3. & Lc4 & Sf6?? \\
+        4. & Dxf7 & (checkmate) \\
+        \hline
+    \end{tabular}
+    \caption{Scholar's Mate}
+    \label{tab:chess_moves}
+\end{table}
+To make the YuMi Robot's moves as clean as possible it is important to have two targets above the desired destination. One that is about 5 mm above the chess piece and one that is higher in the range 25-50 mm above the piece. This allows the YuMi Robot to move smoothly between each target. Due to the 3D-scans being somewhat inaccurate the distances specified before may need some adjustments depending on the piece and quality of the model.
+
+To simplify the paths the YuMi Robot returns to a set point after picking up or placing a piece. This point is centered above the queen with a 25 mm offset towards the YuMi Robot. 
+
+After the paths have been created it is important to note that a fully extended gripper would collide with pieces surrounding the piece to be picked up. To solve this the rapid command \textit{g\_MoveTo value;} was used. This command extends the gripper to the specified value allowing the gripper to easily slide between the pieces. The space between chess pieces is about 7 mm for the large pieces and about 8 mm for pawns.
+
+After YuMi robot has won the game it will do a little victory dance by simply moving the arm up in the air up and down. To get this to work it also has to be implemented a helping point, as moving from start position straight up would cause a collision. Therefore, by putting a helping point in front and up from the robot then returning back to y axis it will be able to safely perform the victory dance. 
+
+\subsubsection{Code structure and timings}
+The top part located within the module part consist of all the targets and two variables called speed and precision. The variables control the simulation speed and precision of the YuMi Robot. The main body of the Rapid code consists of while loop that is constantly true allowing the code to run in a loop, within the while loop the code has several if statements that check if the buttons connected to the YuMi Robot are pressed. These if statements contain the different functions for each chess move.
+
+The green button \textit{di\_cube} when pressed runs move 1 chess move from table~\ref{tab:chess_moves}. When it is pressed a second time it runs move 2 and so on. After all moves are run it resets to move 1. The second blue button \textit{di\_cylinder} runs all moves with timing delay specified in the code by a variable. The third red button \textit{di\_prism} runs the celebration described in section \ref{sec:Challenge_paths_targets}. The fourth yellow button \textit{di\_home} returns the YuMi Robot to its start position.
+
+The final button is an emergency stop button called \textit{di\_EmergencySituation} this button when pressed runs a trap routine that stops the YuMi Robot mid path, and when let go it starts to move from the same position it stopped. One of the main perks to using a trap routine is that it can interrupt any movement and then issue a command which the it would not be able to do with if statements.
+
 
 \section{Results}
 \section{Discussion}
