@@ -110,9 +110,13 @@ The same logic and procedure apply similarly for the cylinder and prism.
 
 \subsubsection{Simulating Movement Of The Emergency Button}
 The first step towards animating the button is to separate the button and base objects from each other. 
-DESCRIBE HOW SEPARATE. 
-CREATE MECHANISM
-SMART COMPONENT (POSE MOVER and LOGIC GATE)
+rightclick-Disconnect library-ungroup
+Create mechanism-devie type (Device)-kinematics type (other)
+Create link (E-stob base as baselink)
+Create joint (parentlink (base), childlink (button))
+Joint limit -10 mm and 0mm z axis. First position 0 mm z-axis and second -10 mm z-axis. Create new pose with pressed state. Create digital output access level all
+
+1 not logic gate, 2 pose mover
 STATION LOGIC
 OUTPUT SIGNAL AND WHY
 
@@ -164,6 +168,13 @@ The green button \textit{di\_cube} when pressed runs move 1 chess move from tabl
 The final button is an emergency stop button called \textit{di\_EmergencySituation} this button when pressed runs a trap routine that stops the YuMi Robot mid path, and when let go it starts to move from the same position it stopped. One of the main perks to using a trap routine is that it can interrupt any movement and then issue a command which the it would not be able to do with if statements.
 
 \section{Results}
+\subsection{YuMi Application}
+After achieving a working simulation, we tested it on the actual robot, but encountered issues not present in the simulation. Movements that functioned well in simulation caused collisions or exceeded joint limits in practice. To address this, intermediate help points can be added to guide the robot safely around obstacles. However, the primary issue usually arises from inconsistent axis configurations across target points, causing unexpected rotations or joint over extensions. Ensuring consistent axis configurations for all points within the same path effectively resolves this problem.
+
+\subsection{YuMi Challenge}
+The YuMi challenge did not present significant issues regarding configurations; however, we encountered challenges related to the precision required when playing chess with a robotic arm. Specifically, ensuring that the arm or gripper avoided accidental contact with other pieces while grabbing or placing chess pieces demanded careful attention. To resolve this, we adjusted the height of the arm movements to prevent unwanted contact. During placement, problems arose from either missing the intended target or unintentionally knocking over adjacent pieces, largely because such conditions weren't visible in simulations. Introducing helping points or raising the pieces slightly mitigated these difficulties.
+Additionally, we encountered an issue where the gripper had sticky tape on it, causing pieces to become stuck during handling. 
+After these issues were tackled it worked flawlessly and the victory dance added at the end also worked as intended.
 \section{Discussion}
 \section{Conclusions} to the
 
