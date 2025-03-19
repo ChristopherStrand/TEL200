@@ -121,6 +121,9 @@ OUTPUT SIGNAL AND WHY
 \subsubsection{CAD geometry}
 \textbf{Jørgen fikser hvordan lage sjakkbrett!!!!}
 
+To be able to get accurate placements of the chess pieces, we modeled a chess board using the Rectangle surface geometry option in RobotStudio. Here we created a 25x25mm square surface, and created a chess board from 64 of these. We centered the board axis to align with the target of the wobj0, to simplify our setup process. We also aligned the border of the board 200 mm from the wobj0 target. 
+We created targets for the center of each chess board square, to place the pieces correctly. 
+
 To create our CAD geometry we used a 3D-scanner borrowed from Eiklab to make a 3D object of each type of chess piece. We then imported each 3D file into Fusion360 where we performed the following steps.
 \begin{enumerate}
     \item Mesh $\rightarrow$ Insert $\rightarrow$ Insert Mesh
@@ -170,4 +173,3 @@ The final button is an emergency stop button called \textit{di\_EmergencySituati
 
 
 \end{document}
-
