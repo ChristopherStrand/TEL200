@@ -4,46 +4,38 @@
 \usepackage{graphicx}       
 \usepackage{geometry}
 \usepackage{parskip}
-\usepackage{wrapfig}
-\usepackage{caption}
-\usepackage{listings}
-\usepackage{xcolor}
-
-\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
-\lstdefinelanguage{RAPID}{
-  morekeywords={MODULE, PROC, VAR, CONST, IF, THEN, ELSE, WHILE, FOR, TO, ENDFOR, RETURN, TRUE, FALSE, PERS, TASK, ENDPROC, ENDIF, ENDWHILE, TEST, CASE, DEFAULT, ENDTEST, STOP, ERROR, TRAP, CONNECT, DISCONNECT, RAISE, EXIT, ENDTRAP, WITH},
-  sensitive=true,
-  morecomment=[l]{!},       % Single-line comment
-  morecomment=[s]{/*}{*/},   % Multi-line comment
-  morestring=[b]{"}         % Strings wrapped in "
-}
-
-\lstdefinestyle{rapidstyle}{
-  language=RAPID,
-  basicstyle=\ttfamily\footnotesize,
-  keywordstyle=\color{blue}\bfseries,
-  stringstyle=\color{red},
-  commentstyle=\color{darkgreen},
-  numbers=left,
-  numberstyle=\tiny,
-  frame=single,
-  backgroundcolor=\color{gray!10},
-}
-
-\lstset{style=rapidstyle}
+\usepackage{textcomp}
+\usepackage{fontspec}
 
 \geometry{a4paper, margin=2.5cm} 
 
-\title{TEL200 - ABB RobotStudio and YuMi Project}
-\author{J\o rgen Asmundvaag \\ Ludvik H\o iberg-Aslaksen \\ Christopher Ljosland Strand}
-\date{March 2025}
-
 \begin{document}
 
-\maketitle
+\begin{titlepage}
+    \centering
+    \pagenumbering{gobble}
+    \vfill
+    
+    \title{ABB RobotStudio, YuMi Application \& YuMi Challenge \\ \large TEL200 technical report}
+    \author{J\o rgen Asmundvaag \\ Ludvik H\o iberg-Aslaksen \\ Christopher Ljosland Strand}
+    \date{March 2025}
+    \maketitle
+    
+    \vfill
+\end{titlepage}
+
+\pagenumbering{arabic}
+
+\newpage
+\tableofcontents
 
 \newpage
 \section{Abstract}
+This lab project consists of two problems meant to solve with the ABB YuMi IRB® 1400 collaborative robot. 
+
+YuMi Application i
+The purpose of the YuMi Application is to move geometric objects to another positon, and back to their position. This is achieved by applying the 
+
 \section{Introduction}
 Industrial robotics plays an increasingly vital role in enhancing productivity, precision, and efficiency within modern manufacturing processes. ABB RobotStudio and RAPID provides a powerful platform for simulating and optimizing robotic operations in a virtual environment prior to physical implementation.
 
@@ -116,7 +108,7 @@ The YuMi robot, with its seven joints, experiences fewer singularities and can e
 The workstation is composed of a cube, cylinder and prism and two slots for each where the task it to move these from one of the slots to the other one and back on the press of a button.
 The YuMi application will not need any modifications to the models as these were already implemented.
 \subsubsection{Creating the paths and targets}
-the slots are places in a 3x3 grid where the coloums (x axis) is the slots and the rows (y axis) are the slots for each body, coordinate system defined from the table. The distance between the center of each slot is 100 mm. The task is to move the bodies from col 1$\rightarrow$3 or vice-versa. 
+the slots are places in a 3x3 grid where the coloums (x axis) is the slots and the rows (y axis) are the slots for each body, coordinate system defined from the table. The distance between the center of each slot is 100 mm. The task is to move the bodies from col 1->3 or vice-versa. 
 As the gripper has a local coordinate system and as the gripper will try to match its coordinate system with body we have to rotate all the points local coordinate system 180 degrees, either x or y (we used x).
 Grabbing the cube is quite simple, we defined one point lower where it´s grabbing the cube and one above, each side, to avoid collision with the slots and/or drag. The path used these points to move the body from one side to the other.
 Cylinder is very similar and no need for much extra, but important to be centered for it to hold.
@@ -131,49 +123,15 @@ For example, when the green button \textit{di\_cube} is pressed, the program fir
 
 The same logic and procedure apply similarly for the cylinder and prism.
 
-\subsubsection{Creating The Mechanism Of The Emergency Button}
-\begin{wrapfigure}{r}{0.25\textwidth}
-  \label{fig:create_joint}
-  \centering
-  \includegraphics[width=0.2\textwidth]{create_joint.png}
-  \caption{Create joint}
-\end{wrapfigure}
-The first step towards animating the button is to create a mechanism. This can be done by pressing the create mechanism button under the modeling tab, but first the emergency button needs to be two separate objects. To achieve this, right click then select disconnect library and then ungroup. After this has been done, the components will show up in create mechanism as components when creating joints. Under device dropdown select device and under the kinematic dropdown select other.
 
-The second step is to create links and joints. First create the links with the e-stob base as the baselink, and the e-stop button as childlink. Then to create joints choose prismatic as the joint type and according to the task description the button has a travel distance of 10 mm. The button travels along the z-axis in the negative direction therefore the min limit is set to -10 mm and max limit to 0 mm. It is important to also set the first position to -10 mm. After this has been done the mechanism is done and compile mechanism can be pressed. The final step is to make a pressed pose such that it can be moved with smart components.
 
-\subsubsection{Simulating The Emergency Button}
-The emergency stop button needs to stop all movements when pressed and when let go, start all movement. To achieve this a trap routine must be used it has the ability to interrupt any movement then issue a command. The trap routine can be created using the syntax below:
-\begin{lstlisting}
-    TRAP EmergencyStop
-        StopMove;
-        WaitUntil di_EmergencySituation = 0;
-        StartMove;
-    ENDTRAP
-\end{lstlisting}
-This trap routine when called stops all movement then waits until the emergency button no longer is pressed. Under module a interrupt number needs to be defined this allows the program to use a interrupt in the code. This can be done by writing: 
-\begin{lstlisting}
-VAR intnum stop_emer; ! interrupt number datatype
-\end{lstlisting}
-After this the interrupt number stop\_emer needs to be connected to a trap routine. Using the CONNECT keyword can achieve this it also needs to be defined as the correct interrupt signal type this can be doing by using ISignalDI. All of this needs to be written under main.
-\begin{lstlisting}
-    ! Connects the intnum with the trap routine EmergencyStop
-    CONNECT stop_emer WITH EmergencyStop;
-    ! Handles checking wether the emergency stop button is pressed
-    ISignalDI di_EmergencySituation, high, stop_emer;
-\end{lstlisting}
 
-When simulating the emergency button a digital output signal is required so that the di\_EmergencySituation can be set high while the button moves in the simulation. Create a digital output signal named do\_EmergencySituation with access level all. To simulate the movement of the button a input, a output a NOT logic gate and two pose movers are required in a smart component. 
 
-When a pose mover receives a high signal to its Execute it will move the mechanism to that pose. Using a NOT gate the Execute on the pose mover can be set to high when the input is low such the unpressed state is active when input is low. The input is connected directly to pose mover for the pressed state so the pose mover will be in its pressed pose when the input is high. The input is also connect to directly to the output for use later in station logic. See figure~\ref{fig:smart_component_emer} for a picture of the smart component.
-\begin{center}
-    \includegraphics[width=0.8\linewidth]{SC_emer_button.png}
-    \captionof{figure}{Smart component of the emergency button}
-    \label{fig:smart_component_emer}
-\end{center}
-To connect the functionality of the emergency button to the simulated movement a few connections in station logic is required. First connect do\_EmergencySituation to input of the emergency button smart component then connect the output of the emergency button smart component to di\_EmergencySituation. When do\_EmergencySituation is set to high the button will move and execute the trap routine.
-Create digital output access level all. 
-1 not logic gate, 2 pose mover
+\subsubsection{Simulating Movement Of The Emergency Button}
+The first step towards animating the button is to separate the button and base objects from each other. 
+DESCRIBE HOW SEPARATE. 
+CREATE MECHANISM
+SMART COMPONENT (POSE MOVER and LOGIC GATE)
 STATION LOGIC
 OUTPUT SIGNAL AND WHY
 
@@ -181,6 +139,9 @@ OUTPUT SIGNAL AND WHY
 \subsection{YuMi Challenge}
 \subsubsection{CAD geometry}
 \textbf{Jørgen fikser hvordan lage sjakkbrett!!!!}
+
+To be able to get accurate placements of the chess pieces, we modeled a chess board using the Rectangle surface geometry option in RobotStudio. Here we created a 25x25mm square surface, and created a chess board from 64 of these. We centered the board axis to align with the target of the wobj0, to simplify our setup process. We also aligned the border of the board 200 mm from the wobj0 target. 
+We created targets for the center of each chess board square, to place the pieces correctly. 
 
 To create our CAD geometry we used a 3D-scanner borrowed from Eiklab to make a 3D object of each type of chess piece. We then imported each 3D file into Fusion360 where we performed the following steps.
 \begin{enumerate}
@@ -224,17 +185,37 @@ The green button \textit{di\_cube} when pressed runs move 1 chess move from tabl
 
 The final button is an emergency stop button called \textit{di\_EmergencySituation} this button when pressed runs a trap routine that stops the YuMi Robot mid path, and when let go it starts to move from the same position it stopped. One of the main perks to using a trap routine is that it can interrupt any movement and then issue a command which the it would not be able to do with if statements.
 
+\subsubsection{Physical development}
+To get a chess board with the same size and targets as the one used for the simulation, we had to create it from scratch. For this we used Figma, and created an A4 frame, with 25x25mm squares. To get the correct placement of the pieces, we created a cross in the center of each square. This got exported as a pdf, and printed out. 
+
 \section{Results}
 \subsection{YuMi Application}
-After achieving a working simulation, we tested it on the actual robot, but encountered issues not present in the simulation. Movements that functioned well in simulation caused collisions or exceeded joint limits in practice. To address this, intermediate help points can be added to guide the robot safely around obstacles. However, the primary issue usually arises from inconsistent axis configurations across target points, causing unexpected rotations or joint over extensions. Ensuring consistent axis configurations for all points within the same path effectively resolves this problem.
+For the YuMi Application task, we found several results during our work on the robot. By applying the knowledge on poses and joints from the lectures, we managed to move all the geometric forms both to the other side, and back to their starting position. 
+
+\subsubsection{Challenges}
+The greatest challenge we faced during our work on the YuMi Application, was in regards to poses and singularities. 
+The YuMi has 7 degrees of freedom and is a redundant manipulator. This gives the 
 
 \subsection{YuMi Challenge}
-The YuMi challenge did not present significant issues regarding configurations; however, we encountered challenges related to the precision required when playing chess with a robotic arm. Specifically, ensuring that the arm or gripper avoided accidental contact with other pieces while grabbing or placing chess pieces demanded careful attention. To resolve this, we adjusted the height of the arm movements to prevent unwanted contact. During placement, problems arose from either missing the intended target or unintentionally knocking over adjacent pieces, largely because such conditions weren't visible in simulations. Introducing helping points or raising the pieces slightly mitigated these difficulties.
-Additionally, we encountered an issue where the gripper had sticky tape on it, causing pieces to become stuck during handling. 
-After these issues were tackled it worked flawlessly and the victory dance added at the end also worked as intended.
-\section{Discussion}
-\section{Conclusions} to the
+For the YuMi Challenge, we managed to play the Scholar's mate against a person, using the collaborative 
+\subsubsection{Challenges}
 
+\section{Discussion}
+\subsection{YuMi Application}
+\subsubsection{Paths}
+One area we could have improved, would be on the paths that the robot are following. We have seen improvements in every version of our program, and we feel that the paths that ended up being in the program are the simplest and most linear we have managed to create. But there are definetily an area of improvement, especially for clearance. Even though the robot is moving clear of any objects and collisions, we are aware of some positions on the path where the arm could benefit from more distance from both the table and the robot body.
+
+\subsection{YuMi Challenge}
+\subsubsection{Expansion}
+For the YuMi Challenge, we decided to hard code the moves of the common schools´ mate. Although we think this is sufficient to show of the YuMi´s application in a collaborative environment in regard to the time at hand, we see the possibility to expand its moves and gameplaying ability. 
+
+Before deciding on defining the moves as paths, we explored the possibility of using the buttons as forward/backward, left/right and pick up/down buttons. This would emulate a game controller, making it possible to play all possible moves.  
+
+\section{Conclusions} 
+The ABB YuMi 1400 cobot is powerful and versatile. During the projects we have seen both its capabilities and its limitations. 
+having the opportunity  to develop in RobotStudio, test our code on the robot, debug and go back to RobotStudio abled us to quickly patch bugs, test new approaches and refine our code. 
+
+For the YuMi Challenge, having the freedom to choose our task, gave us another view on working with cobots, and
 
 
 \end{document}
