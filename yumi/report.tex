@@ -4,6 +4,33 @@
 \usepackage{graphicx}       
 \usepackage{geometry}
 \usepackage{parskip}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+\lstdefinelanguage{RAPID}{
+  morekeywords={MODULE, PROC, VAR, CONST, IF, THEN, ELSE, WHILE, FOR, TO, ENDFOR, RETURN, TRUE, FALSE, PERS, TASK, ENDPROC, ENDIF, ENDWHILE, TEST, CASE, DEFAULT, ENDTEST, STOP, ERROR, TRAP, CONNECT, DISCONNECT, RAISE, EXIT, ENDTRAP, WITH},
+  sensitive=true,
+  morecomment=[l]{!},       % Single-line comment
+  morecomment=[s]{/*}{*/},   % Multi-line comment
+  morestring=[b]{"}         % Strings wrapped in "
+}
+
+\lstdefinestyle{rapidstyle}{
+  language=RAPID,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{red},
+  commentstyle=\color{darkgreen},
+  numbers=left,
+  numberstyle=\tiny,
+  frame=single,
+  backgroundcolor=\color{gray!10},
+}
+
+\lstset{style=rapidstyle}
 
 \geometry{a4paper, margin=2.5cm} 
 
@@ -89,7 +116,7 @@ The YuMi robot, with its seven joints, experiences fewer singularities and can e
 The workstation is composed of a cube, cylinder and prism and two slots for each where the task it to move these from one of the slots to the other one and back on the press of a button.
 The YuMi application will not need any modifications to the models as these were already implemented.
 \subsubsection{Creating the paths and targets}
-the slots are places in a 3x3 grid where the coloums (x axis) is the slots and the rows (y axis) are the slots for each body, coordinate system defined from the table. The distance between the center of each slot is 100 mm. The task is to move the bodies from col 1->3 or vice-versa. 
+the slots are places in a 3x3 grid where the coloums (x axis) is the slots and the rows (y axis) are the slots for each body, coordinate system defined from the table. The distance between the center of each slot is 100 mm. The task is to move the bodies from col 1$\rightarrow$3 or vice-versa. 
 As the gripper has a local coordinate system and as the gripper will try to match its coordinate system with body we have to rotate all the points local coordinate system 180 degrees, either x or y (we used x).
 Grabbing the cube is quite simple, we defined one point lower where it´s grabbing the cube and one above, each side, to avoid collision with the slots and/or drag. The path used these points to move the body from one side to the other.
 Cylinder is very similar and no need for much extra, but important to be centered for it to hold.
@@ -104,18 +131,48 @@ For example, when the green button \textit{di\_cube} is pressed, the program fir
 
 The same logic and procedure apply similarly for the cylinder and prism.
 
+\subsubsection{Creating The Mechanism Of The Emergency Button}
+\begin{wrapfigure}{r}{0.25\textwidth}
+  \label{fig:create_joint}
+  \centering
+  \includegraphics[width=0.2\textwidth]{create_joint.png}
+  \caption{Create joint}
+\end{wrapfigure}
+The first step towards animating the button is to create a mechanism. This can be done by pressing the create mechanism button under the modeling tab, but first the emergency button needs to be two separate objects. To achieve this, right click then select disconnect library and then ungroup. After this has been done, the components will show up in create mechanism as components when creating joints. Under device dropdown select device and under the kinematic dropdown select other.
 
+The second step is to create links and joints. First create the links with the e-stob base as the baselink, and the e-stop button as childlink. Then to create joints choose prismatic as the joint type and according to the task description the button has a travel distance of 10 mm. The button travels along the z-axis in the negative direction therefore the min limit is set to -10 mm and max limit to 0 mm. It is important to also set the first position to -10 mm. After this has been done the mechanism is done and compile mechanism can be pressed. The final step is to make a pressed pose such that it can be moved with smart components.
 
+\subsubsection{Simulating The Emergency Button}
+The emergency stop button needs to stop all movements when pressed and when let go, start all movement. To achieve this a trap routine must be used it has the ability to interrupt any movement then issue a command. The trap routine can be created using the syntax below:
+\begin{lstlisting}
+    TRAP EmergencyStop
+        StopMove;
+        WaitUntil di_EmergencySituation = 0;
+        StartMove;
+    ENDTRAP
+\end{lstlisting}
+This trap routine when called stops all movement then waits until the emergency button no longer is pressed. Under module a interrupt number needs to be defined this allows the program to use a interrupt in the code. This can be done by writing: 
+\begin{lstlisting}
+VAR intnum stop_emer; ! interrupt number datatype
+\end{lstlisting}
+After this the interrupt number stop\_emer needs to be connected to a trap routine. Using the CONNECT keyword can achieve this it also needs to be defined as the correct interrupt signal type this can be doing by using ISignalDI. All of this needs to be written under main.
+\begin{lstlisting}
+    ! Connects the intnum with the trap routine EmergencyStop
+    CONNECT stop_emer WITH EmergencyStop;
+    ! Handles checking wether the emergency stop button is pressed
+    ISignalDI di_EmergencySituation, high, stop_emer;
+\end{lstlisting}
 
+When simulating the emergency button a digital output signal is required so that the di\_EmergencySituation can be set high while the button moves in the simulation. Create a digital output signal named do\_EmergencySituation with access level all. To simulate the movement of the button a input, a output a NOT logic gate and two pose movers are required in a smart component. 
 
-\subsubsection{Simulating Movement Of The Emergency Button}
-The first step towards animating the button is to separate the button and base objects from each other. 
-rightclick-Disconnect library-ungroup
-Create mechanism-devie type (Device)-kinematics type (other)
-Create link (E-stob base as baselink)
-Create joint (parentlink (base), childlink (button))
-Joint limit -10 mm and 0mm z axis. First position 0 mm z-axis and second -10 mm z-axis. Create new pose with pressed state. Create digital output access level all
-
+When a pose mover receives a high signal to its Execute it will move the mechanism to that pose. Using a NOT gate the Execute on the pose mover can be set to high when the input is low such the unpressed state is active when input is low. The input is connected directly to pose mover for the pressed state so the pose mover will be in its pressed pose when the input is high. The input is also connect to directly to the output for use later in station logic. See figure~\ref{fig:smart_component_emer} for a picture of the smart component.
+\begin{center}
+    \includegraphics[width=0.8\linewidth]{SC_emer_button.png}
+    \captionof{figure}{Smart component of the emergency button}
+    \label{fig:smart_component_emer}
+\end{center}
+To connect the functionality of the emergency button to the simulated movement a few connections in station logic is required. First connect do\_EmergencySituation to input of the emergency button smart component then connect the output of the emergency button smart component to di\_EmergencySituation. When do\_EmergencySituation is set to high the button will move and execute the trap routine.
+Create digital output access level all. 
 1 not logic gate, 2 pose mover
 STATION LOGIC
 OUTPUT SIGNAL AND WHY
