@@ -1,1 +1,2 @@
-Yo TEL200 let's go
+TEL200 YuMi Challenge (Academic):
+TEL200 YuMi Challenge (Not academic): 
