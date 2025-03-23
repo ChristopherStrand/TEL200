@@ -9,7 +9,7 @@
 \usepackage{caption}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{pdfpages}
+
 
 \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
 \lstdefinelanguage{RAPID}{
@@ -199,15 +199,14 @@ When a pose mover receives a high signal to its Execute it will move the mechani
     \label{fig:smart_component_emer}
 \end{center}
 To connect the functionality of the emergency button to the simulated movement a few connections in station logic is required. First connect do\_EmergencySituation to input of the emergency button smart component then connect the output of the emergency button smart component to di\_EmergencySituation. When do\_EmergencySituation is set to high the button will move and execute the trap routine.
-Create digital output access level all. 
-1 not logic gate, 2 pose mover
-STATION LOGIC
-OUTPUT SIGNAL AND WHY
-
 
 \subsection{YuMi Challenge}
 \subsubsection{CAD geometry}
-\textbf{Jørgen fikser hvordan lage sjakkbrett!!!!}
+To be able to get accurate placements of the chess pieces, we modeled a chess board using the Rectangle surface geometry option in RobotStudio. Here we created a 25x25mm square surface, and created a chess board from 64 of these. We centered the board axis to align with the target of the wobj0, to simplify our setup process. We also aligned the border of the board 200 mm from the wobj0 target. 
+We created targets for the center of each chess board square, to place the pieces correctly. 
+
+To be able to get accurate placements of the chess pieces, we modeled a chess board using the Rectangle surface geometry option in RobotStudio. Here we created a 25x25mm square surface, and created a chess board from 64 of these. We centered the board axis to align with the target of the wobj0, to simplify our setup process. We also aligned the border of the board 200 mm from the wobj0 target. 
+We created targets for the center of each chess board square, to place the pieces correctly. 
 
 To be able to get accurate placements of the chess pieces, we modeled a chess board using the Rectangle surface geometry option in RobotStudio. Here we created a 25x25mm square surface, and created a chess board from 64 of these. We centered the board axis to align with the target of the wobj0, to simplify our setup process. We also aligned the border of the board 200 mm from the wobj0 target. 
 We created targets for the center of each chess board square, to place the pieces correctly. 
@@ -239,7 +238,7 @@ When creating the paths, we based the targets on the following chess moves.
     \caption{Scholar's Mate}
     \label{tab:chess_moves}
 \end{table}
-To make the YuMi Robot's moves as clean as possible it is important to have two targets above the desired destination. One that is about 5 mm above the chess piece and one that is higher in the range 25-50 mm above the piece. This allows the YuMi Robot to move smoothly between each target. Due to the 3D-scans being somewhat inaccurate the distances specified before may need some adjustments depending on the piece and quality of the model.
+To make the YuMi Robot's moves as clean as possible it is important to have two targets above the desired destination. One that is about 5 mm above the chess piece and one that is higher in the range 25-50 mm above the piece. This allows the YuMi Robot to move smoothly between each target. Due to the 3D-scans being somewhat inaccurate the distances specified before may need some adustments depending on the piece and quality of the model.
 
 To simplify the paths the YuMi Robot returns to a set point after picking up or placing a piece. This point is centered above the queen with a 25 mm offset towards the YuMi Robot. 
 
@@ -256,15 +255,10 @@ The final button is an emergency stop button called \textit{di\_EmergencySituati
 
 \subsubsection{Physical development}
 To get a chess board with the same size and targets as the one used for the simulation, we had to create it from scratch. For this we used Figma, and created an A4 frame, with 25x25mm squares. To get the correct placement of the pieces, we created a cross in the center of each square. This got exported as a pdf, and printed out. 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.25\linewidth]{Chess Board PDF}
-    \caption{Chess Board}
-    \label{fig:enter-label}
-\end{figure}
 \section{Results}
 \subsection{YuMi Application}
 For the YuMi Application task, we found several results during our work on the robot. By applying the knowledge on poses and joints from the lectures, we managed to move all the geometric forms both to the other side, and back to their starting position. 
+
 
 In the first versions of our code, we encountered several errors with the robot moving in the wrong direction, or having an error in joint limits. This proved as challenging to solve, but 
 
@@ -288,14 +282,23 @@ After these issues were tackled it worked flawlessly and the victory dance added
 \section{Discussion}
 \subsection{YuMi Application}
 \subsubsection{Paths}
+
 One area we could have improved, would be on the paths that the robot are following. We have seen improvements in every version of our program, and we feel that the paths that ended up being in the program are the simplest and most linear we have managed to create. But there are definitely an area of improvement, especially for clearance. Even though the robot is moving clear of any objects and collisions, we are aware of some positions on the path where the arm could benefit from more distance from both the table and the robot body.
 
 \subsection{YuMi Challenge}
 \subsubsection{Expansion}
 For the YuMi Challenge, we decided to hard code the moves of the common schools´ mate. Although we think this is sufficient to show of the YuMi´s application in a collaborative environment in regard to the time at hand, we see the possibility to expand its moves and game playing ability. 
 
+One area we could have improved, would be on the paths that the robot are following. We have seen improvements in every version of our program, and we feel that the paths that ended up being in the program are the simplest and most linear we have managed to create. But there are definetily an area of improvement, especially for clearance. Even though the robot is moving clear of any objects and collisions, we are aware of some positions on the path where the arm could benefit from more distance from both the table and the robot body.
+
+\subsection{YuMi Challenge}
+\subsubsection{Expansion}
+For the YuMi Challenge, we decided to hard code the moves of the common schools´ mate. Although we think this is sufficient to show of the YuMi´s application in a collaborative environment in regard to the time at hand, we see the possibility to expand its moves and gameplaying ability. 
+
 Before deciding on defining the moves as paths, we explored the possibility of using the buttons as forward/backward, left/right and pick up/down buttons. This would emulate a game controller, making it possible to play all possible moves.  
 
+
+Before deciding on defining the moves as paths, we explored the possibility of using the buttons as forward/backward, left/right and pick up/down buttons. This would emulate a game controller, making it possible to play all possible moves.  
 
 \section{Conclusions} 
 The ABB YuMi 1400 cobot is powerful and versatile. During the projects we have seen both its capabilities and its limitations. 
