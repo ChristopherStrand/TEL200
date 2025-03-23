@@ -5,11 +5,11 @@
 \usepackage{geometry}
 \usepackage{parskip}
 \usepackage{textcomp}
-\usepackage{fontspec}
 \usepackage{wrapfig}
 \usepackage{caption}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{pdfpages}
 
 \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
 \lstdefinelanguage{RAPID}{
@@ -58,21 +58,29 @@
 
 \newpage
 \section{Abstract}
-This lab project consists of two problems meant to solve with the ABB YuMi IRB® 1400 collaborative robot. 
+Jørgen Asmundvaag
+Ludvik Høibjerg-Aslaksen
+Christopher Ljosland Strand
+
+NMBU, February-March 2025.
+
+This lab project consists of two problems that can be solved with the collaborative robot ABB YuMi IRB® 1400. 
 
 YuMi Application i
-The purpose of the YuMi Application is to move geometric objects to another positon, and back to their position. This is achieved by applying the 
+The purpose of the YuMi Application is to move geometric objects to another position and back to their position. This is achieved by applying the theory on joints, poses, and kinematics for robotic arms. By developing and testing on the YuMi, we were able to achieve a looping program for moving all the geometric forms forward and back to the starting point. 
+
+For the YuMi Challenge, we chose to create a program that enables us to play chess against the robot. This was achieved by using our knowledge gained during the YuMi Application, and developing further in RobotStudio. By the end of the project period, we got the YuMi to play the scholar's mate against a human, in a collaborative environment. 
 
 \section{Introduction}
 Industrial robotics plays an increasingly vital role in enhancing productivity, precision, and efficiency within modern manufacturing processes. ABB RobotStudio and RAPID provides a powerful platform for simulating and optimizing robotic operations in a virtual environment prior to physical implementation.
 
-In this project, we use ABB's RobotStudio simulation environment to develop, simulate, and deploy two different applications as described in the task description. 
+In this project, we use ABB's RobotStudio simulation environment to develop, simulate, and deploy two different applications, as described in the task description. 
 
 The first application involves precisely picking up objects and moving them to another designated location at the click of a button, with additional safety functionality integrated through an emergency button.
 
 The second application is the YuMi challenge where we were given an open task to test the capabilities of the YuMi robot. Inspired by the 18th century famous machine that fascinated audiences across Europe, "The Turk". As The Turk, we won´t either play fully autonomous and will use scholar´s mate to make it possible to finish within the given time frame. This  will provide an understanding of the functionality of YuMi robot and it´s capabilities doing precise tasks.
 
-The report provides detailed insights into the methods, procedures, and results achieved through these applications, emphasizing practical experiences and theoretical connections drawn from the course syllabus.
+The report provides detailed information on the methods, procedures and results achieved through these applications, focusing on practical experiences and theoretical connections drawn from the course syllabus.
 
 \section{Method}
 \subsection{Theory}
@@ -248,14 +256,23 @@ The final button is an emergency stop button called \textit{di\_EmergencySituati
 
 \subsubsection{Physical development}
 To get a chess board with the same size and targets as the one used for the simulation, we had to create it from scratch. For this we used Figma, and created an A4 frame, with 25x25mm squares. To get the correct placement of the pieces, we created a cross in the center of each square. This got exported as a pdf, and printed out. 
-
+\begin{figure}
+    \centering
+    \includegraphics[width=0.25\linewidth]{Chess Board PDF}
+    \caption{Chess Board}
+    \label{fig:enter-label}
+\end{figure}
 \section{Results}
 \subsection{YuMi Application}
 For the YuMi Application task, we found several results during our work on the robot. By applying the knowledge on poses and joints from the lectures, we managed to move all the geometric forms both to the other side, and back to their starting position. 
 
+In the first versions of our code, we encountered several errors with the robot moving in the wrong direction, or having an error in joint limits. This proved as challenging to solve, but 
+
+
+
 \subsubsection{Challenges}
 The greatest challenge we faced during our work on the YuMi Application, was in regards to poses and singularities. 
-The YuMi has 7 degrees of freedom and is a redundant manipulator. This gives the 
+The YuMi has 7 degrees of freedom and is a redundant manipulator.
 
 \subsection{YuMi Challenge}
 For the YuMi Challenge, we managed to play the Scholar's mate against a person, using the collaborative 
@@ -271,11 +288,11 @@ After these issues were tackled it worked flawlessly and the victory dance added
 \section{Discussion}
 \subsection{YuMi Application}
 \subsubsection{Paths}
-One area we could have improved, would be on the paths that the robot are following. We have seen improvements in every version of our program, and we feel that the paths that ended up being in the program are the simplest and most linear we have managed to create. But there are definetily an area of improvement, especially for clearance. Even though the robot is moving clear of any objects and collisions, we are aware of some positions on the path where the arm could benefit from more distance from both the table and the robot body.
+One area we could have improved, would be on the paths that the robot are following. We have seen improvements in every version of our program, and we feel that the paths that ended up being in the program are the simplest and most linear we have managed to create. But there are definitely an area of improvement, especially for clearance. Even though the robot is moving clear of any objects and collisions, we are aware of some positions on the path where the arm could benefit from more distance from both the table and the robot body.
 
 \subsection{YuMi Challenge}
 \subsubsection{Expansion}
-For the YuMi Challenge, we decided to hard code the moves of the common schools´ mate. Although we think this is sufficient to show of the YuMi´s application in a collaborative environment in regard to the time at hand, we see the possibility to expand its moves and gameplaying ability. 
+For the YuMi Challenge, we decided to hard code the moves of the common schools´ mate. Although we think this is sufficient to show of the YuMi´s application in a collaborative environment in regard to the time at hand, we see the possibility to expand its moves and game playing ability. 
 
 Before deciding on defining the moves as paths, we explored the possibility of using the buttons as forward/backward, left/right and pick up/down buttons. This would emulate a game controller, making it possible to play all possible moves.  
 
@@ -284,5 +301,7 @@ Before deciding on defining the moves as paths, we explored the possibility of u
 The ABB YuMi 1400 cobot is powerful and versatile. During the projects we have seen both its capabilities and its limitations. 
 having the opportunity  to develop in RobotStudio, test our code on the robot, debug and go back to RobotStudio abled us to quickly patch bugs, test new approaches and refine our code. 
 
-For the YuMi Challenge, having the freedom to choose our task, gave us another view on working with cobots, and
+For the YuMi Challenge, having the freedom to choose our task, gave us another view on working with cobots, and 
+
+During this project we have tested and seen both the possibilities and limits of the current state of the art of collaborative robots. With the YuMi application we were able to practice and learn the basics of RobotStudio and developing with RAPID
 \end{document}
