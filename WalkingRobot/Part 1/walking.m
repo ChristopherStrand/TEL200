@@ -20,9 +20,8 @@
 %
 % http://www.petercorke.com
 
-function walkingAnimated(varargin)
+function walking(varargin)
 
-    
     opt.niterations = 500;
     opt.movie = [];
     
@@ -132,8 +131,8 @@ hold on
 % Turns the robot x degree, input negative to turn anticlockwise
 heading_angle = 0;
 function turn(center, degrees)
-    rotate(body, [0 0 1], degrees/500, center)
-    heading_angle = heading_angle + degrees/500;
+    rotate(body, [0 0 1], degrees/niterations, center)
+    heading_angle = heading_angle + degrees/niterations;
     legs(1).base = transl(body.Vertices(1, :))*trotz(heading_angle, 'deg');
     legs(2).base = transl(body.Vertices(2, :))*trotz(heading_angle, 'deg');
     legs(3).base = transl(body.Vertices(3, :))*trotz(heading_angle + 180, 'deg');
@@ -146,7 +145,7 @@ end
 
 % Moves the robot 1cm forwards or 0.01 in the coordinate system
 function move(center, centimeters) % Center is not used, but move needs the a parmater here to avoid errors
-    centimeters = (centimeters)/(5000/2);
+    centimeters = (centimeters)/((niterations*10)/2);
     direction = (body.Vertices(3, :)-body.Vertices(2, :));
     direction = flip(direction(1:2));
     direction = direction/length(direction);
@@ -195,7 +194,7 @@ end
 %   robot_animate(@move, find_center(), 10)
 %   robot_animate(@turn, find_center(), 5)
 
-robot_animate(@turn, 10)
+%robot_animate(@turn, 10)
 %robot_animate(@move, 100)
 
 
