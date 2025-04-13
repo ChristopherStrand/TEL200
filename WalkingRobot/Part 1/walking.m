@@ -131,8 +131,8 @@ hold on
 % Turns the robot x degree, input negative to turn anticlockwise
 heading_angle = 0;
 function turn(center, degrees)
-    rotate(body, [0 0 1], degrees/niterations, center)
-    heading_angle = heading_angle + degrees/niterations;
+    rotate(body, [0 0 1], degrees/500, center)
+    heading_angle = heading_angle + degrees/500;
     legs(1).base = transl(body.Vertices(1, :))*trotz(heading_angle, 'deg');
     legs(2).base = transl(body.Vertices(2, :))*trotz(heading_angle, 'deg');
     legs(3).base = transl(body.Vertices(3, :))*trotz(heading_angle + 180, 'deg');
@@ -145,7 +145,7 @@ end
 
 % Moves the robot 1cm forwards or 0.01 in the coordinate system
 function move(center, centimeters) % Center is not used, but move needs the a parmater here to avoid errors
-    centimeters = (centimeters)/((niterations*10)/2);
+    centimeters = (centimeters)/((500*10)/2);
     direction = (body.Vertices(3, :)-body.Vertices(2, :));
     direction = flip(direction(1:2));
     direction = direction/length(direction);
@@ -172,7 +172,7 @@ turn([0 0 0], -1)
 
 % To use the robot_animate function
     function robot_animate(f, move_amount)
-    for i=1:opt.niterations
+    for i=1:500
         legs(1).animate(gait(qcycle, k, 0,   0));
         legs(2).animate(gait(qcycle, k, 100, 0));
         legs(3).animate(gait(qcycle, k, 200, 1));
@@ -194,8 +194,8 @@ end
 %   robot_animate(@move, find_center(), 10)
 %   robot_animate(@turn, find_center(), 5)
 
-%robot_animate(@turn, 10)
-%robot_animate(@move, 100)
+robot_animate(@turn, 90)
+robot_animate(@move, 100)
 
 
 % ----------------- Main code ---------------

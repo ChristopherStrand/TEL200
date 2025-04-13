@@ -20,7 +20,7 @@
 %
 % http://www.petercorke.com
 
-classdef walkingClass
+classdef walkingClassPRM < handle
     properties
         heading_angle;
         niterations;
@@ -31,10 +31,11 @@ classdef walkingClass
         legs;
         body;
         qcycle;
+        path_list;
     end
     methods
         %Initialize 
-        function obj = walkingClass(niterations, movie_name, movie_true)
+        function obj = walkingClassPRM(niterations, movie_name, movie_true)
             obj.heading_angle = 0;
             obj.niterations = niterations;
             if movie_true == true
@@ -58,6 +59,13 @@ classdef walkingClass
         % Runs everything setup related and returns
         % setup = {k, A, legs, body};
         function setup = robot_setup(obj)
+            % Offset starting positions 
+            % NB! for testing purposes. Offset = 0 otherwise
+            x_offset = 0;
+            y_offset = 0;
+            z_offset = 0; % Lift up for easier viewing
+
+            scale = 100; % Scale orginal size
             L1 = 0.1; L2 = 0.1;
             fprintf('create leg model\n');
             
@@ -133,17 +141,20 @@ classdef walkingClass
             % create 4 leg robots.  Each is a clone of the leg robot we built above,
             % has a unique name, and a base transform to represent it's position
             % on the body of the walking robot.
-            legs_set(1) = SerialLink(leg, 'name', 'leg1');
-            legs_set(2) = SerialLink(leg, 'name', 'leg2', 'base', transl(-L, 0, 0));
-            legs_set(3) = SerialLink(leg, 'name', 'leg3', 'base', transl(-L, -W, 0)*trotz(pi));
-            legs_set(4) = SerialLink(leg, 'name', 'leg4', 'base', transl(0, -W, 0)*trotz(pi));
+            legs_set(1) = SerialLink(leg, 'name', 'leg1', 'base', transl(x_offset, y_offset, z_offset));
+            legs_set(2) = SerialLink(leg, 'name', 'leg2', 'base', transl(-L+x_offset, y_offset, z_offset));
+            legs_set(3) = SerialLink(leg, 'name', 'leg3', 'base', transl(-L+x_offset, -W+y_offset, z_offset)*trotz(pi));
+            legs_set(4) = SerialLink(leg, 'name', 'leg4', 'base', transl(x_offset, -W+y_offset, z_offset)*trotz(pi));
             
             % create a fixed size axis for the robot, and set z positive downward
-            clf; axis([-0.3 0.1 -0.2 0.2 -0.15 0.05]); set(gca,'Zdir', 'reverse');
+            %clf; axis([-0.3 0.1 -0.2 0.2 -0.15 0.05]); set(gca,'Zdir', 'reverse');
             hold on
             % draw the robot's body
-            body_set = patch([0 -L -L 0], [0 0 -W -W], [0 0 0 0], ...
+            body_set = patch([0 -L -L 0]*scale, [0 0 -W -W]*scale, [0 0 0 0], ...
                     'FaceColor', 'm', 'FaceAlpha', 0.5);
+            body_set.XData = body_set.XData+x_offset;
+            body_set.YData = body_set.YData+y_offset;
+            body_set.ZData = body_set.ZData+z_offset;
             % instantiate each robot in the axes
             for i=1:4
                 legs_set(i).plot(qcycle_set(1,:), plotopt{:});
@@ -160,6 +171,19 @@ classdef walkingClass
             center = mean(obj.body.Vertices);
         end
 
+        function normal_vector = normal_direction(obj, normal_vector)
+            C = obj.find_center();
+            P = (obj.body.Vertices(3, :)-obj.body.Vertices(2, :))/2;
+            vCenter = C - P;
+            product = dot(normal_vector, vCenter(1:2));
+            if product > 0
+                disp("Swapping normal direction...")
+                normal_vector = normal_vector*-1;
+            else 
+                disp("Keeping normal direction...")
+            end
+
+        end
 
         % Motion primitives turn and move
         % Turns the robot x degree, input negative to turn anticlockwise
@@ -173,20 +197,16 @@ classdef walkingClass
         end
 
         % Moves the robot 1cm forwards or 0.01 in the coordinate system
-        function move(obj, center, centimeters) % Center is not used, but move needs the a parmater here to avoid errors
+        function move(obj, ~, centimeters) % Center is not used, but move needs the a parmater here to avoid errors
             centimeters = (centimeters)/((obj.niterations*10)/2);
             direction = (obj.body.Vertices(3, :)-obj.body.Vertices(2, :));
-            direction = flip(direction(1:2));
-            direction = direction/length(direction);
-        
-            x_axis_lower = -0.2+center(1);
-            x_axis_upper = 0.2+center(1);
-            y_axis_lower = -0.2+center(2);
-            y_axis_upper = 0.2+center(2);
-            axis([x_axis_lower x_axis_upper y_axis_lower y_axis_upper -0.15 0.05]);
+            direction = [direction(2), -direction(1)];
+            direction = direction/norm(direction);
+            
+            %direction = obj.normal_direction(direction);
         
             obj.body.XData = obj.body.XData + (centimeters)*(direction(1));
-            obj.body.YData = obj.body.YData + (centimeters)*(-direction(2));
+            obj.body.YData = obj.body.YData + (centimeters)*(direction(2));
         
             obj.legs(1).base = transl(obj.body.Vertices(1, :))*trotz(obj.heading_angle, 'deg');
             obj.legs(2).base = transl(obj.body.Vertices(2, :))*trotz(obj.heading_angle, 'deg');
@@ -209,6 +229,50 @@ classdef walkingClass
             
                 obj.k = obj.k+1;
                 obj.A.add();
+            end
+        end
+        % Moves along a path from point to point
+        function follow(obj, paths)
+            %z_offset = -10;
+            for path = paths
+                % Finds the element inside path at the first second column
+                x_offset = path{1}(1, 1);
+                y_offset = path{1}(1, 2);
+                center = obj.find_center();
+                
+                % Moves the robot to the path start posistion
+                obj.body.XData = obj.body.XData + x_offset - center(1);
+                obj.body.YData = obj.body.YData + y_offset - center(2);
+
+                obj.legs(1).base = transl(obj.body.Vertices(1, :))*trotz(obj.heading_angle, 'deg');
+                obj.legs(2).base = transl(obj.body.Vertices(2, :))*trotz(obj.heading_angle, 'deg');
+                obj.legs(3).base = transl(obj.body.Vertices(3, :))*trotz(obj.heading_angle + 180, 'deg');
+                obj.legs(4).base = transl(obj.body.Vertices(4, :))*trotz(obj.heading_angle + 180, 'deg');               
+                
+                path_length = length(path{1}(:, :));
+                for coordinates_index = 1:path_length
+                    % Vector from robot current point in path to next
+                    if coordinates_index + 1 <= path_length
+                        path_vector = path{1}(coordinates_index+1, :)-path{1}(coordinates_index, :);
+                    else
+                        disp("Path finished!")
+                        break;
+                    end
+
+                    body_vector = (obj.body.Vertices(3, :)-obj.body.Vertices(2, :));
+                    body_vector = [body_vector(2), -body_vector(1)];
+                    body_vector = body_vector/norm(body_vector);
+                    %body_vector = obj.normal_direction(body_vector);
+
+                    angle = atan2d(path_vector(2), path_vector(1)) - atan2d(body_vector(2), body_vector(1));
+                    %angle = mod(angle + 180, 360) - 180;
+
+
+                    disp(["Turing:" angle " degrees"])
+                    obj.robot_animate(@obj.turn, angle);
+                    disp(["Moving:" norm(path_vector) " cm"])
+                    obj.robot_animate(@obj.move, norm(path_vector)*5);
+                end
             end
         end
     end
