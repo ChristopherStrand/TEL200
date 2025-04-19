@@ -1,10 +1,10 @@
-function prm()
-    load KillianMap
-    prm = PRM(KillianMap);              
-    prm.plan('npoints', 500);            
-
+function part3_prm()
+    s = load('KillianMap.mat');
+    KillianMap = s.KillianMap;
+    prm = PRM(KillianMap);
+    prm.plan('npoints', 500, 'distthresh', 30);
     figure;
-    imshow(KillianMap == 0);              
+    imshow(KillianMap == 0);
     colors = rand(10, 3); 
     hold on;
     paths = {};
@@ -19,18 +19,21 @@ function prm()
             path = planroute(prm, KillianMap, x_start, y_start, x_stop, y_stop, colors(k, :));
             if ~isempty(path)
                 paths{path_count} = path;
-                path_count = path_count + 1;
             end
         catch
             disp('inside wall');
         end
     end
+
+    
 end
 
-function path = planroute(prm, map, x_start, y_start, x_stop, y_stop, color)
+function path = planroute(prm, KillianMap, x_start, y_start, x_stop, y_stop, color)
+    start_point = KillianMap(y_start, x_start);
+    stop_point  = KillianMap(y_stop, x_stop);
     path = [];
 
-    if map(y_start, x_start) ~= 0 || map(y_stop, x_stop) ~= 0
+    if start_point ~= 0 || stop_point ~= 0
         disp('inside a wall');
         return
     end
