@@ -20,7 +20,7 @@
 %
 % http://www.petercorke.com
 
-classdef walkingClassPRM < handle
+classdef RobotMovementPRMSupport < handle
     properties
         heading_angle;
         niterations;
@@ -35,7 +35,7 @@ classdef walkingClassPRM < handle
     end
     methods
         %Initialize 
-        function obj = walkingClassPRM(niterations, movie_name, movie_true)
+        function obj = RobotMovementPRMSupport(niterations, movie_name, movie_true)
             obj.heading_angle = 0;
             obj.niterations = niterations;
             if movie_true == true
@@ -72,8 +72,8 @@ classdef walkingClassPRM < handle
             % create the leg links based on DH parameters
             %                    theta   d     a  alpha  
             links(1) = Link([    0       0    0   pi/2 ], 'standard');
-            links(2) = Link([    0       0    L1   0   ], 'standard');
-            links(3) = Link([    0       0   -L2   0   ], 'standard');
+            links(2) = Link([    0       0    (L1)   0   ], 'standard');
+            links(3) = Link([    0       0   (-L2)   0   ], 'standard');
             
             % now create a robot to represent a single leg
             leg = SerialLink(links, 'name', 'leg', 'offset', [pi/2   0  -pi/2]);
@@ -232,9 +232,8 @@ classdef walkingClassPRM < handle
             end
         end
         % Moves along a path from point to point
-        function follow(obj, paths)
-            %z_offset = -10;
-            for path = paths
+        function follow(obj, PRM_path)
+            for path = PRM_path
                 % Finds the element inside path at the first second column
                 x_offset = path{1}(1, 1);
                 y_offset = path{1}(1, 2);

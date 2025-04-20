@@ -20,7 +20,7 @@
 %
 % http://www.petercorke.com
 
-function walking(varargin)
+function RobotMovementFunction(varargin)
 
     opt.niterations = 500;
     opt.movie = [];

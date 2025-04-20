@@ -1,9 +1,9 @@
-function found_paths = WalkingPRM(PRM_dots, desired_paths)
+function found_paths = BackendPRM(PRM_dots, desired_paths)
     % --------- User Settings -----------
     load house_no_gaps.mat house; % Map to use
     %desired_paths = 1;      % Amount of paths to generate
     %PRM_dots = 300;         % Number of dots to generate
-    %rng_seed = 44; % Completed seeds: 42, 43, 44
+    rng_seed = 42; % Completed seeds: 42, 43, 44
     % --------- User Settings -----------
     
     if exist('rng_seed', 'var')
@@ -50,16 +50,36 @@ function found_paths = WalkingPRM(PRM_dots, desired_paths)
     
     % --------- Query phase -----------
     paths = 1;
-    found_paths = {};
+    found_paths = {desired_paths};
+    prm.plot(); % Plots PRM dots and map
     hold on
-    %found_paths(paths) = generate_path(house, prm);
+
     while paths <= desired_paths % Runs until the desired amount of paths have been found
         try
             found_paths{paths} = generate_path(house, prm);
-            prm.plot() % Plots query on the map
+            current_found_path = found_paths{paths};
+            
+            % ----------- Plot paths -----------
+            plot(current_found_path(:, 1), current_found_path(:,2), '-', 'Color', [rand rand rand], 'LineWidth', 2);
+            plot(current_found_path(1, 1), current_found_path(1, 2), 'go', 'MarkerSize', 10);
+            plot(current_found_path(end, 1), current_found_path(end, 2),  'ro', 'MarkerSize', 10);
+            % ----------- Plot paths -----------
+
             paths = paths + 1;
             disp("Successfully found a path!")
-        catch
+        catch ME
+            if strcmp(ME.identifier, 'MATLAB:assertion:failed') || ...
+               strcmp(ME.identifier, 'MATLAB:assert:failed') || ...
+               strcmp(ME.identifier, 'MATLAB:assert:notTrueScalar')
+                % Handle assertion error
+                disp('Assertion error encountered:');
+                disp(ME.message);
+            else
+                % Handle other errors
+                disp('Other error encountered:');
+                disp(ME.message);
+                disp(ME.identifier);
+            end
             % Bad practice, but I couldnt get try catch to work in matlab
         end
     end
