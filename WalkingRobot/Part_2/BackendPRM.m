@@ -67,19 +67,7 @@ function found_paths = BackendPRM(PRM_dots, desired_paths)
 
             paths = paths + 1;
             disp("Successfully found a path!")
-        catch ME
-            if strcmp(ME.identifier, 'MATLAB:assertion:failed') || ...
-               strcmp(ME.identifier, 'MATLAB:assert:failed') || ...
-               strcmp(ME.identifier, 'MATLAB:assert:notTrueScalar')
-                % Handle assertion error
-                disp('Assertion error encountered:');
-                disp(ME.message);
-            else
-                % Handle other errors
-                disp('Other error encountered:');
-                disp(ME.message);
-                disp(ME.identifier);
-            end
+        catch
             % Bad practice, but I couldnt get try catch to work in matlab
         end
     end
