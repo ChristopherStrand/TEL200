@@ -1,9 +1,9 @@
-pg = PoseGraph('killian.g2o', 'laser');
-scanMap = pg.scanmap();
+pg = PoseGraph('killian.g2o', 'laser');  
+occgrid = pg.scanmap();   
+pg.plot_occgrid(occgrid);           
 
-KillianMap = ones(size(scanMap), 'uint8');
-KillianMap(scanMap >= M & scanMap ~= 0) = 0;
-
+KillianMap = uint8(occgrid ~= 0);
+KillianMap = 1 - KillianMap;
 
 save('KillianMap.mat', 'KillianMap');
 

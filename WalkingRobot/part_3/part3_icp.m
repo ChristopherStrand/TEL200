@@ -1,4 +1,4 @@
-function part3_icp(pg)@
+function part3_icp(pg)
     %getting the occupancy grid map from the pose graph
     scanmap = pg.scanmap();
     figure;

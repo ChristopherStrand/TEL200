@@ -1,52 +1,51 @@
-function part3_prm()
-%loads the map from file
+function part2()
     s = load('KillianMap.mat');
-    KillianMap = s.KillianMap;
-    prm = PRM(KillianMap);
-    prm.plan('npoints', 1000, 'distthresh', 10);
+    house = s.KillianMap;
+
+    prm = PRM(house);
+    prm.plan('npoints', 5000, 'distthresh', 30);
+
     figure;
-    imshow(KillianMap == 0);
+    imshow(house == 0);
     colors = rand(10, 3); 
     hold on;
     paths = {};
     path_count = 1;
 
-    [free_y, free_x] = find(KillianMap == 0);
-    num_free = numel(free_x);
+    [free_y, free_x] = find(house == 0);
 
     for k = 1:10
         try
-            idx_start = randi(num_free);
-            idx_stop = randi(num_free);
+            idx_start = randi(length(free_x));
+            idx_stop  = randi(length(free_x));
+
             x_start = free_x(idx_start);
             y_start = free_y(idx_start);
             x_stop  = free_x(idx_stop);
             y_stop  = free_y(idx_stop);
-            path = planroute(prm, KillianMap, x_start, y_start, x_stop, y_stop, colors(k, :));
+
+            path = planroute(prm, house, x_start, y_start, x_stop, y_stop, colors(k, :));
             if ~isempty(path)
                 paths{path_count} = path;
+                path_count = path_count + 1;
             end
         catch
             disp('inside wall');
         end
     end
-
-    
 end
 
-function path = planroute(prm, KillianMap, x_start, y_start, x_stop, y_stop, color)
-    start_point = KillianMap(y_start, x_start);
-    stop_point  = KillianMap(y_stop, x_stop);
+function path = planroute(prm, house, x_start, y_start, x_stop, y_stop, color)
     path = [];
 
-    if start_point ~= 0 || stop_point ~= 0
+    if house(y_start, x_start) ~= 0 || house(y_stop, x_stop) ~= 0
         disp('inside a wall');
         return
     end
 
     start = [x_start, y_start];
     stop  = [x_stop,  y_stop];
-    path  = prm.query(start, stop);
+    path = prm.query(start, stop);
 
     if isempty(path)
         return
