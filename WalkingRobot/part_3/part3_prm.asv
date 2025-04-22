@@ -1,0 +1,43 @@
+function part3_prm()
+    s = load('KillianMap.mat');
+    KillianMap = s.KillianMap;
+
+    prm = PRM(KillianMap);
+    prm.plan('npoints', 3000, 'distthresh', 20);
+
+    figure;
+    imshow(KillianMap == 1);
+    hold on;
+    title('Paths på KillianMap');
+
+    colors = rand(1, 3);
+
+    x_start = 2520; y_start = 2500;
+    x_stop  = 950; y_stop  = 950;
+
+    if KillianMap(y_start, x_start) ~= 1 || KillianMap(y_stop, x_stop) ~= 1
+        error("Start/slutt er ikke i gangområde!");
+    end
+
+    path = planroute(prm, x_start, y_start, x_stop, y_stop, colors);
+end
+
+function path = planroute(prm, x_start, y_start, x_stop, y_stop, color)
+    [H, W] = size(prm.map);
+    if x_start > W || y_start > H || x_stop > W || y_stop > H
+        path = [];
+        return;
+    end
+
+    start = [x_start, y_start];
+    stop  = [x_stop,  y_stop];
+    path  = prm.query(start, stop);
+
+    if isempty(path)
+        return;
+    end
+
+    plot(path(:,1), path(:,2), '-', 'Color', color, 'LineWidth', 2);
+    plot(start(1), start(2), 'go', 'MarkerSize', 10, 'LineWidth', 2);
+    plot(stop(1),  stop(2),  'ro', 'MarkerSize', 10, 'LineWidth', 2);
+end
