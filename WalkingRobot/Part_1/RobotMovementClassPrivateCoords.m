@@ -31,7 +31,6 @@ classdef RobotMovementClassPrivateCoords < handle
         legs;
         body;
         qcycle;
-        path_list;
     end
     methods
         %Initialize 
@@ -191,8 +190,8 @@ classdef RobotMovementClassPrivateCoords < handle
         end
 
         % Moves the robot 1cm forwards or 0.01 in the coordinate system
-        function move(obj, ~, centimeters) % Center is not used, but move needs the a parmater here to avoid errors
-            centimeters = (centimeters)/((obj.niterations*10)/2);
+        function move(obj, center, centimeters) 
+            centimeters = (centimeters)/((obj.niterations*1000));
             direction = (obj.body.Vertices(3, :)-obj.body.Vertices(2, :));
             direction = [direction(2), -direction(1)];
             direction = direction/norm(direction);
@@ -229,63 +228,7 @@ classdef RobotMovementClassPrivateCoords < handle
                 obj.A.add();
             end
         end
-        % Moves along a path from point to point
-        function follow(obj, PRM_path)
-            for path = PRM_path
-                % Finds the element inside path at the first second column
-                x_offset = path{1}(1, 1);
-                y_offset = path{1}(1, 2);
-                center = obj.find_center();
-                
-                % Moves the robot to the path start posistion
-                obj.body.XData = obj.body.XData + x_offset - center(1);
-                obj.body.YData = obj.body.YData + y_offset - center(2);
-
-                obj.legs(1).base = transl(obj.body.Vertices(1, :))*trotz(obj.heading_angle, 'deg');
-                obj.legs(2).base = transl(obj.body.Vertices(2, :))*trotz(obj.heading_angle, 'deg');
-                obj.legs(3).base = transl(obj.body.Vertices(3, :))*trotz(obj.heading_angle + 180, 'deg');
-                obj.legs(4).base = transl(obj.body.Vertices(4, :))*trotz(obj.heading_angle + 180, 'deg');               
-                
-                path_length = length(path{1}(:, :));
-                for coordinates_index = 1:path_length
-                    % Vector from robot current point in path to next
-                    if coordinates_index + 1 <= path_length
-                        path_vector = path{1}(coordinates_index+1, :)-path{1}(coordinates_index, :);
-                    else
-                        disp("Path finished!")
-                        break;
-                    end
-
-                    body_vector = (obj.body.Vertices(3, :)-obj.body.Vertices(2, :));
-                    body_vector = [body_vector(2), -body_vector(1)];
-                    body_vector = body_vector/norm(body_vector);
-                    %body_vector = obj.normal_direction(body_vector);
-
-                    angle = atan2d(path_vector(2), path_vector(1)) - atan2d(body_vector(2), body_vector(1));
-                    %angle = mod(angle + 180, 360) - 180;
-
-
-                    disp(["Turing:" angle " degrees"])
-                    obj.robot_animate(@obj.turn, angle);
-                    disp(["Moving:" norm(path_vector) " cm"])
-                    obj.robot_animate(@obj.move, norm(path_vector)*5);
-                end
-            end
-        end
     end
 end
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
