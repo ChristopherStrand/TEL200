@@ -14,7 +14,7 @@ WalkingPRM has two parameters:
     - Amount of paths to generate
 WalkingPRM outputs all paths generated
 %}
-paths = BackendPRM(200, 3); % Handles PRM plotting
+paths = BackendPRM(200, 10); % Handles PRM plotting
 
 % The robot expects a reverse z-axis se we reverse the z-axis of the PRM
 % plot
