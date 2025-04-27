@@ -66,15 +66,14 @@ classdef RobotMovementPRMSupport < handle
             z_offset = 0; % Lift up for easier viewing
 
             scale_body = 100; % scale body
-            scale = 100; % Scale legs
             L1 = 0.1; L2 = 0.1;
             fprintf('create leg model\n');
             
             % create the leg links based on DH parameters
             %                    theta   d     a  alpha  
             links(1) = Link([    0       0    0   pi/2 ], 'standard');
-            links(2) = Link([    0       0    (L1)+scale   0   ], 'standard');
-            links(3) = Link([    0       0   (-L2)+scale   0   ], 'standard');
+            links(2) = Link([    0       0    (L1)   0   ], 'standard');
+            links(3) = Link([    0       0   (-L2)   0   ], 'standard');
             
             % now create a robot to represent a single leg
             leg = SerialLink(links, 'name', 'leg', 'offset', [pi/2   0  -pi/2]);
@@ -158,7 +157,7 @@ classdef RobotMovementPRMSupport < handle
             body_set.ZData = body_set.ZData+z_offset;
             % instantiate each robot in the axes
             for i=1:4
-                legs_set(i).plot(qcycle_set(1,:), plotopt{:}, 'scale', scale);
+                legs_set(i).plot(qcycle_set(1,:), plotopt{:});
             end
             hold off
             % walk!
