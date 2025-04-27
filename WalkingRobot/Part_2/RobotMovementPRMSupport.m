@@ -65,15 +65,16 @@ classdef RobotMovementPRMSupport < handle
             y_offset = 0;
             z_offset = 0; % Lift up for easier viewing
 
-            scale = 100; % Scale orginal size
+            scale_body = 100; % scale body
+            scale = 100; % Scale legs
             L1 = 0.1; L2 = 0.1;
             fprintf('create leg model\n');
             
             % create the leg links based on DH parameters
             %                    theta   d     a  alpha  
             links(1) = Link([    0       0    0   pi/2 ], 'standard');
-            links(2) = Link([    0       0    (L1)   0   ], 'standard');
-            links(3) = Link([    0       0   (-L2)   0   ], 'standard');
+            links(2) = Link([    0       0    (L1)+scale   0   ], 'standard');
+            links(3) = Link([    0       0   (-L2)+scale   0   ], 'standard');
             
             % now create a robot to represent a single leg
             leg = SerialLink(links, 'name', 'leg', 'offset', [pi/2   0  -pi/2]);
@@ -150,14 +151,14 @@ classdef RobotMovementPRMSupport < handle
             %clf; axis([-0.3 0.1 -0.2 0.2 -0.15 0.05]); set(gca,'Zdir', 'reverse');
             hold on
             % draw the robot's body
-            body_set = patch([0 -L -L 0]*scale, [0 0 -W -W]*scale, [0 0 0 0], ...
+            body_set = patch([0 -L -L 0]*scale_body, [0 0 -W -W]*scale_body, [0 0 0 0], ...
                     'FaceColor', 'm', 'FaceAlpha', 0.5);
             body_set.XData = body_set.XData+x_offset;
             body_set.YData = body_set.YData+y_offset;
             body_set.ZData = body_set.ZData+z_offset;
             % instantiate each robot in the axes
             for i=1:4
-                legs_set(i).plot(qcycle_set(1,:), plotopt{:});
+                legs_set(i).plot(qcycle_set(1,:), plotopt{:}, 'scale', scale);
             end
             hold off
             % walk!
@@ -169,20 +170,6 @@ classdef RobotMovementPRMSupport < handle
 
         function center = find_center(obj)
             center = mean(obj.body.Vertices);
-        end
-
-        function normal_vector = normal_direction(obj, normal_vector)
-            C = obj.find_center();
-            P = (obj.body.Vertices(3, :)-obj.body.Vertices(2, :))/2;
-            vCenter = C - P;
-            product = dot(normal_vector, vCenter(1:2));
-            if product > 0
-                disp("Swapping normal direction...")
-                normal_vector = normal_vector*-1;
-            else 
-                disp("Keeping normal direction...")
-            end
-
         end
 
         % Motion primitives turn and move
