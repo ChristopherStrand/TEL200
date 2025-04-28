@@ -191,7 +191,7 @@ classdef RobotMovementClassPrivateCoords < handle
 
         % Moves the robot 1cm forwards or 0.01 in the coordinate system
         function move(obj, center, centimeters) 
-            centimeters = (centimeters)/((obj.niterations*1000));
+            centimeters = (centimeters)/((obj.niterations*10));
             direction = (obj.body.Vertices(3, :)-obj.body.Vertices(2, :));
             direction = [direction(2), -direction(1)];
             direction = direction/norm(direction);
