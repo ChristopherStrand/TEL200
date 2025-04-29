@@ -8,4 +8,4 @@ KillianMap = 1 - KillianMap;
 save('KillianMap.mat', 'KillianMap');
 
 part3_prm();
-part3_icp(pg);
+part3_icp();
